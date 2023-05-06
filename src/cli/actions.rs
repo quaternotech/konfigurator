@@ -20,34 +20,4 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use std::io;
-
-use konfigurator::cli;
-use konfigurator::cli::actions::BAKE;
-
-fn main() -> io::Result<()> {
-    let matches = cli::interface().get_matches();
-
-    match matches.subcommand() {
-        Some((BAKE, arg_matches)) => {
-            let work_dir = arg_matches.get_one::<String>("work_dir");
-            let out_dir = arg_matches.get_one::<String>("out_dir");
-
-            match konfigurator::bake(work_dir, out_dir) {
-                Ok(out_file) => {
-                    println!("Configuration baked successfully: {}", out_file);
-                }
-                Err(err) => {
-                    eprintln!("{}", err);
-                }
-            }
-        }
-        _ => {
-            cli::interface()
-                .print_long_help()
-                .expect("Fatal: help could not be displayed.");
-        }
-    }
-
-    Ok(())
-}
+pub const BAKE: &'static str = "bake";

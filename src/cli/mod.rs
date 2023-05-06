@@ -20,34 +20,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use std::io;
+use clap::Arg;
+use clap::Command;
 
-use konfigurator::cli;
-use konfigurator::cli::actions::BAKE;
+pub mod actions;
 
-fn main() -> io::Result<()> {
-    let matches = cli::interface().get_matches();
+pub fn interface() -> Command {
+    let crate_name = env!("CARGO_PKG_NAME");
+    let crate_version = env!("CARGO_PKG_NAME");
+    let crate_description = env!("CARGO_PKG_DESCRIPTION");
 
-    match matches.subcommand() {
-        Some((BAKE, arg_matches)) => {
-            let work_dir = arg_matches.get_one::<String>("work_dir");
-            let out_dir = arg_matches.get_one::<String>("out_dir");
-
-            match konfigurator::bake(work_dir, out_dir) {
-                Ok(out_file) => {
-                    println!("Configuration baked successfully: {}", out_file);
-                }
-                Err(err) => {
-                    eprintln!("{}", err);
-                }
-            }
-        }
-        _ => {
-            cli::interface()
-                .print_long_help()
-                .expect("Fatal: help could not be displayed.");
-        }
-    }
-
-    Ok(())
+    Command::new(crate_name)
+        .version(crate_version)
+        .about(crate_description)
+        .subcommand(
+            Command::new(actions::BAKE).args(
+                &[
+                    Arg::new("out_dir")
+                        .short('o')
+                        .long("out-dir")
+                        .value_name("OUT_DIR")
+                        .help("Specify the directory where the `.Konfigurator` file will be placed"),
+                    Arg::new("work_dir")
+                        .short('w')
+                        .long("work-dir")
+                        .value_name("WORK_DIR")
+                        .help("Specify the directory containing the `Konfigurator.xml` file"),
+                ]
+            ).about("Bake the configuration")
+        )
 }

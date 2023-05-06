@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="Konfigurator">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="Section" type="SectionType" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="name" type="NonEmptyStringType" use="required"/>
+            <xs:attribute name="arch" type="SupportedArchitectureType" use="required"/>
+            <xs:attribute name="profile" type="AvailableProfileType" use="required"/>
+        </xs:complexType>
+        <xs:unique name="UniqueSection">
+            <xs:selector xpath="Section"/>
+            <xs:field xpath="@name"/>
+        </xs:unique>
+        <xs:unique name="UniqueConfig">
+            <xs:selector xpath=".//Config"/>
+            <xs:field xpath="@key"/>
+        </xs:unique>
+    </xs:element>
+
+    <xs:complexType name="SectionType">
+        <xs:sequence>
+            <xs:choice>
+                <xs:element name="Section" type="SectionType" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element name="Config" type="ConfigType" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="name" type="NonEmptyStringType" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="ConfigType">
+        <xs:sequence>
+            <xs:choice>
+                <xs:element name="Boolean" type="BooleanType"/>
+                <xs:element name="Integer" type="IntegerType"/>
+                <xs:element name="Double" type="DoubleType"/>
+                <xs:element name="String" type="StringType"/>
+                <xs:element name="Enum" type="EnumType"/>
+            </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="key" type="NonEmptyStringType" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="BooleanType">
+        <xs:attribute name="default" type="xs:boolean" use="required"/>
+        <xs:attribute name="value" type="xs:boolean"/>
+    </xs:complexType>
+
+    <xs:complexType name="IntegerType">
+        <xs:attribute name="default" type="xs:integer" use="required"/>
+        <xs:attribute name="value" type="xs:integer"/>
+        <xs:attribute name="min" type="xs:integer"/>
+        <xs:attribute name="max" type="xs:integer"/>
+    </xs:complexType>
+
+    <xs:complexType name="DoubleType">
+        <xs:attribute name="default" type="xs:float" use="required"/>
+        <xs:attribute name="value" type="xs:double"/>
+        <xs:attribute name="min" type="xs:double"/>
+        <xs:attribute name="max" type="xs:double"/>
+    </xs:complexType>
+
+    <xs:complexType name="StringType">
+        <xs:attribute name="default" type="xs:string" use="required"/>
+        <xs:attribute name="value" type="xs:string"/>
+        <xs:attribute name="min-length" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="max-length" type="xs:nonNegativeInteger"/>
+    </xs:complexType>
+
+    <xs:complexType name="EnumType">
+        <xs:sequence>
+            <xs:element name="Member" type="xs:string" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="default" type="xs:nonNegativeInteger" use="required"/>
+        <xs:attribute name="value" type="xs:nonNegativeInteger"/>
+    </xs:complexType>
+
+    <xs:simpleType name="SupportedArchitectureType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="x86_64"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="AvailableProfileType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="Debug"/>
+            <xs:enumeration value="Release"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="NonEmptyStringType">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>

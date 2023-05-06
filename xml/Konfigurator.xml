@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Konfigurator name="Vanilla" arch="x86_64" profile="Release">
+    <Section name="Core">
+        <Config key="KEY_1">
+            <Enum default="0">
+                <Member>1234</Member>
+                <Member>5678</Member>
+                <Member>1011</Member>
+            </Enum>
+        </Config>
+        <Config key="KEY_2">
+            <Integer default="32"/>
+        </Config>
+        <Config key="KEY_3">
+            <String default="STRING VALUE"/>
+        </Config>
+    </Section>
+    <Section name="Other">
+        <Config key="KEY_4">
+            <Double default="3.14"/>
+        </Config>
+    </Section>
+</Konfigurator>
