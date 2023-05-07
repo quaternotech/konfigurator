@@ -31,7 +31,7 @@ pub mod cli;
 pub mod model;
 
 pub const IN_FILE: &'static str = "Konfigurator.xml";
-pub const OUT_FILE: &'static str = ".Konfigurator";
+pub const OUT_FILE: &'static str = "Konfigurator.rs";
 
 pub fn construct_path(work_dir: Option<&String>, file: &str) -> Result<String, Box<dyn Error>> {
     let default_dir = "./".to_string();

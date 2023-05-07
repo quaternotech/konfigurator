@@ -29,7 +29,7 @@ use titlecase::titlecase;
 
 macro_rules! banner {
     ($($line:expr),*$(,)?) => {
-        format!("#\n{}#\n", vec![$(format!("# {}\n", $line)),*].join(""))
+        format!("//\n{}//\n", vec![$(format!("// {}\n", $line)),*].join(""))
     };
 }
 
@@ -147,9 +147,21 @@ pub struct ConfigType<'a> {
 impl<'a> ConfigType<'a> {
     pub fn value(&self) -> ConfigDataType {
         match self {
-            Self { boolean: Some(inner), .. } => { ConfigDataType::Boolean(inner.value.unwrap_or(inner.default)) }
-            Self { integer: Some(inner), .. } => { ConfigDataType::Integer(inner.value.unwrap_or(inner.default)) }
-            Self { double: Some(inner), .. } => { ConfigDataType::Double(inner.value.unwrap_or(inner.default)) }
+            Self { boolean: Some(inner), .. } => {
+                ConfigDataType::Boolean(
+                    inner.value.unwrap_or(inner.default)
+                )
+            }
+            Self { integer: Some(inner), .. } => {
+                ConfigDataType::Integer(
+                    inner.value.unwrap_or(inner.default)
+                )
+            }
+            Self { double: Some(inner), .. } => {
+                ConfigDataType::Double(
+                    inner.value.unwrap_or(inner.default)
+                )
+            }
             Self { string: Some(inner), .. } => {
                 ConfigDataType::String(
                     inner.value
@@ -170,19 +182,23 @@ impl<'a> ConfigType<'a> {
     }
 }
 
+macro_rules! quote {
+    ($s:expr) => { format!("\"{}\"", $s)};
+}
+
 impl<'a> Dump for ConfigType<'a> {
     fn dump(&self, buffer: &mut String, _depth: Option<&mut Vec<String>>) {
-        fn generic_impl<T: Display>(outer: &ConfigType, buffer: &mut String, value: T) {
-            let config = format!("{}={}\n", outer.key.to_uppercase(), value);
+        fn generic_impl<T: Display>(outer: &ConfigType, dtype: &str, buffer: &mut String, value: T) {
+            let config = format!("#[no_mangle]\npub static {}: {} = {};\n", outer.key.to_uppercase(), dtype, value);
             buffer.push_str(config.as_str());
         }
 
         match self.value() {
-            ConfigDataType::Boolean(value) => generic_impl(self, buffer, value),
-            ConfigDataType::Integer(value) => generic_impl(self, buffer, value),
-            ConfigDataType::Double(value) => generic_impl(self, buffer, value),
-            ConfigDataType::String(value) => generic_impl(self, buffer, value),
-            ConfigDataType::Enum(value) => generic_impl(self, buffer, value),
+            ConfigDataType::Boolean(value) => generic_impl(self, "bool", buffer, value),
+            ConfigDataType::Integer(value) => generic_impl(self, "i32", buffer, value),
+            ConfigDataType::Double(value) => generic_impl(self, "f64", buffer, value),
+            ConfigDataType::String(value) => generic_impl(self, "&'static str", buffer, quote!(value)),
+            ConfigDataType::Enum(value) => generic_impl(self, "&'static str", buffer, quote!(value)),
         }
     }
 }

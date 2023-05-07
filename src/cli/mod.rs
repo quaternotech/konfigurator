@@ -40,7 +40,7 @@ pub fn interface() -> Command {
                         .short('o')
                         .long("out-dir")
                         .value_name("OUT_DIR")
-                        .help("Specify the directory where the `.Konfigurator` file will be placed"),
+                        .help("Specify the directory where the `Konfigurator.rs` file will be placed"),
                     Arg::new("work_dir")
                         .short('w')
                         .long("work-dir")
