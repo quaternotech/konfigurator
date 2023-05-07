@@ -167,7 +167,7 @@ impl<'a> Dump for ConfigType<'a> {
     fn dump(&self, buffer: &mut String, depth: Option<&mut Vec<String>>) {
         fn generic_impl<T: Display>(outer: &ConfigType, buffer: &mut String, value: T, depth: Option<&mut Vec<String>>) {
             let key = format!("CONFIG_{}_{}", depth.unwrap().join("_"), outer.key).to_uppercase();
-            let config = format!("#[no_mangle]\npub const {}: i64 = {};\n", key, value);
+            let config = format!("#[no_mangle]\npub static {}: i64 = {};\n", key, value);
             buffer.push_str(config.as_str());
         }
 
