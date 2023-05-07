@@ -12,13 +12,5 @@
         <Config key="KEY_2">
             <Integer default="32"/>
         </Config>
-        <Config key="KEY_3">
-            <String default="STRING VALUE"/>
-        </Config>
-    </Section>
-    <Section name="Other">
-        <Config key="KEY_4">
-            <Double default="3.14"/>
-        </Config>
     </Section>
 </Konfigurator>

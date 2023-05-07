@@ -122,9 +122,7 @@ impl<'a> Dump for SectionType<'a> {
 pub enum ConfigDataType {
     Boolean(bool),
     Integer(i32),
-    Double(f64),
-    String(String),
-    Enum(String),
+    Enum(i32),
 }
 
 #[derive(Debug, XmlRead)]
@@ -136,12 +134,8 @@ pub struct ConfigType<'a> {
     boolean: Option<BooleanType>,
     #[xml(child = "Integer")]
     integer: Option<IntegerType>,
-    #[xml(child = "Double")]
-    double: Option<DoubleType>,
-    #[xml(child = "String")]
-    string: Option<StringType<'a>>,
     #[xml(child = "Enum")]
-    enumeration: Option<EnumType<'a>>,
+    enumeration: Option<EnumType>,
 }
 
 impl<'a> ConfigType<'a> {
@@ -157,24 +151,11 @@ impl<'a> ConfigType<'a> {
                     inner.value.unwrap_or(inner.default)
                 )
             }
-            Self { double: Some(inner), .. } => {
-                ConfigDataType::Double(
-                    inner.value.unwrap_or(inner.default)
-                )
-            }
-            Self { string: Some(inner), .. } => {
-                ConfigDataType::String(
-                    inner.value
-                         .clone()
-                         .unwrap_or(inner.default.clone())
-                         .to_string()
-                )
-            }
             Self { enumeration: Some(inner), .. } => {
                 ConfigDataType::Enum(
                     inner.members
                          .get(inner.value.unwrap_or(inner.default) as usize)
-                         .unwrap().content.to_string()
+                         .unwrap().content
                 )
             }
             _ => { unreachable!() }
@@ -182,23 +163,17 @@ impl<'a> ConfigType<'a> {
     }
 }
 
-macro_rules! quote {
-    ($s:expr) => { format!("\"{}\"", $s)};
-}
-
 impl<'a> Dump for ConfigType<'a> {
     fn dump(&self, buffer: &mut String, _depth: Option<&mut Vec<String>>) {
-        fn generic_impl<T: Display>(outer: &ConfigType, dtype: &str, buffer: &mut String, value: T) {
-            let config = format!("#[no_mangle]\npub static {}: {} = {};\n", outer.key.to_uppercase(), dtype, value);
+        fn generic_impl<T: Display>(outer: &ConfigType, buffer: &mut String, value: T) {
+            let config = format!("#[no_mangle]\npub const {}: i64 = {};\n", outer.key.to_uppercase(), value);
             buffer.push_str(config.as_str());
         }
 
         match self.value() {
-            ConfigDataType::Boolean(value) => generic_impl(self, "bool", buffer, value),
-            ConfigDataType::Integer(value) => generic_impl(self, "i32", buffer, value),
-            ConfigDataType::Double(value) => generic_impl(self, "f64", buffer, value),
-            ConfigDataType::String(value) => generic_impl(self, "&'static str", buffer, quote!(value)),
-            ConfigDataType::Enum(value) => generic_impl(self, "&'static str", buffer, quote!(value)),
+            ConfigDataType::Boolean(value) => generic_impl(self, buffer, value),
+            ConfigDataType::Integer(value) => generic_impl(self, buffer, value),
+            ConfigDataType::Enum(value) => generic_impl(self, buffer, value),
         }
     }
 }
@@ -228,49 +203,19 @@ pub struct IntegerType {
 }
 
 #[derive(Debug, XmlRead)]
-#[xml(tag = "Double")]
-pub struct DoubleType {
-    #[xml(attr = "default")]
-    default: f64,
-    #[xml(attr = "value")]
-    value: Option<f64>,
-    #[allow(dead_code)]
-    #[xml(attr = "min")]
-    min: Option<f64>,
-    #[allow(dead_code)]
-    #[xml(attr = "max")]
-    max: Option<f64>,
-}
-
-#[derive(Debug, XmlRead)]
-#[xml(tag = "String")]
-pub struct StringType<'a> {
-    #[xml(attr = "default")]
-    default: Cow<'a, str>,
-    #[xml(attr = "value")]
-    value: Option<Cow<'a, str>>,
-    #[allow(dead_code)]
-    #[xml(attr = "min-length")]
-    min_length: Option<u32>,
-    #[allow(dead_code)]
-    #[xml(attr = "max-length")]
-    max_length: Option<u32>,
-}
-
-#[derive(Debug, XmlRead)]
 #[xml(tag = "Enum")]
-pub struct EnumType<'a> {
+pub struct EnumType {
     #[xml(attr = "default")]
     default: u32,
     #[xml(attr = "value")]
     value: Option<u32>,
     #[xml(child = "Member")]
-    members: Vec<MemberType<'a>>,
+    members: Vec<MemberType>,
 }
 
 #[derive(Debug, XmlRead)]
 #[xml(tag = "Member")]
-pub struct MemberType<'a> {
+pub struct MemberType {
     #[xml(text)]
-    content: Cow<'a, str>,
+    content: i32,
 }
