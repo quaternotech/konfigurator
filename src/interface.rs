@@ -20,33 +20,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use clap::Arg;
-use clap::Command;
+use clap::{Parser, Subcommand};
 
-pub mod actions;
+#[derive(Debug, Parser)]
+#[command(author, version, about, long_about = None)]
+pub struct Interface {
+    #[command(subcommand)]
+    pub command: Command,
+}
 
-pub fn interface() -> Command {
-    let crate_name = env!("CARGO_PKG_NAME");
-    let crate_version = env!("CARGO_PKG_NAME");
-    let crate_description = env!("CARGO_PKG_DESCRIPTION");
-
-    Command::new(crate_name)
-        .version(crate_version)
-        .about(crate_description)
-        .subcommand(
-            Command::new(actions::BAKE).args(
-                &[
-                    Arg::new("out_dir")
-                        .short('o')
-                        .long("out-dir")
-                        .value_name("OUT_DIR")
-                        .help("Specify the directory where the `Konfigurator.rs` file will be placed"),
-                    Arg::new("work_dir")
-                        .short('w')
-                        .long("work-dir")
-                        .value_name("WORK_DIR")
-                        .help("Specify the directory containing the `Konfigurator.xml` file"),
-                ]
-            ).about("Bake the configuration")
-        )
+#[derive(Debug, Subcommand)]
+pub enum Command {
+    #[command(about = "Bake the source configuration file")]
+    Bake {
+        #[arg(short, long, help = "Set the directory with the source config file", default_value_t = String::from("."))]
+        work_dir: String,
+        #[arg(short, long, help = "Set the directory for the generated output", default_value_t = String::from("."))]
+        out_dir: String,
+        #[arg(short, long, help = "Enable verbose output")]
+        verbose: bool,
+    },
 }

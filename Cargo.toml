@@ -2,10 +2,11 @@
 name = "konfigurator"
 version = "0.1.0"
 edition = "2021"
+description = "A tool for streamlining the intricacies of kernel configuration."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = { version = "4.2.5" }
+clap = { version = "4.2.5", features = ["derive"] }
 strong-xml = "0.6.3"
 titlecase = "2.2.1"

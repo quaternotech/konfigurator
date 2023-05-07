@@ -21,22 +21,42 @@
 // SOFTWARE.
 
 use std::error::Error;
+use std::fmt;
+use std::fmt::Display;
+use std::fmt::Formatter;
 
-use clap::Parser;
+#[derive(Debug)]
+pub enum IOError {
+    PathResolutionError(String, String),
+    ReadError(String, String),
+    WriteError(String, String),
+}
 
-use konfigurator::interface::{Command, Interface};
-
-fn main() -> Result<(), Box<dyn Error>> {
-    let input = Interface::parse();
-
-    match input.command {
-        Command::Bake { work_dir, out_dir, verbose } => {
-            match konfigurator::bake(work_dir, out_dir, verbose) {
-                Ok(generated_file) => println!("Generated file: {}", generated_file),
-                Err(err) => eprintln!("{}", err),
+impl Display for IOError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::PathResolutionError(err_kind, cause) => {
+                write!(f, "Could not resolve path: {}: {}", err_kind, cause)
+            }
+            Self::ReadError(err_kind, cause) => {
+                write!(f, "Error while reading: {}: {}", err_kind, cause)
+            }
+            Self::WriteError(err_kind, cause) => {
+                write!(f, "Error while writing: {}: {}", err_kind, cause)
             }
         }
     }
-
-    Ok(())
 }
+
+impl Error for IOError {}
+
+#[derive(Debug)]
+pub struct FileFormatError(pub String, pub String);
+
+impl Display for FileFormatError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "File format error: {}: {}", self.0, self.1)
+    }
+}
+
+impl Error for FileFormatError {}

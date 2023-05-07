@@ -20,4 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-pub const BAKE: &'static str = "bake";
+use std::error::Error;
+use std::path::Path;
+
+use crate::error::IOError;
+
+pub fn resolve_path(path: String, file: String) -> Result<String, Box<dyn Error>> {
+    std::fs::create_dir_all(&path).or_else(
+        |err| Err(IOError::PathResolutionError(err.kind().to_string(), path.clone()))
+    )?;
+
+    Ok(Path::new(path.as_str()).join(file).to_string_lossy().to_string())
+}

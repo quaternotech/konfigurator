@@ -33,7 +33,7 @@ macro_rules! banner {
     };
 }
 
-pub trait Dump {
+trait Dump {
     fn dump(&self, buffer: &mut String, depth: Option<&mut Vec<String>>);
 }
 
@@ -87,7 +87,7 @@ impl<'a> Dump for Konfigurator<'a> {
 
 #[derive(Debug, XmlRead)]
 #[xml(tag = "Section")]
-pub struct SectionType<'a> {
+struct SectionType<'a> {
     #[xml(attr = "name")]
     name: Cow<'a, str>,
     #[xml(child = "Section")]
@@ -119,7 +119,7 @@ impl<'a> Dump for SectionType<'a> {
     }
 }
 
-pub enum ConfigDataType {
+enum ConfigDataType {
     Boolean(bool),
     Integer(i32),
     Enum(i32),
@@ -127,7 +127,7 @@ pub enum ConfigDataType {
 
 #[derive(Debug, XmlRead)]
 #[xml(tag = "Config")]
-pub struct ConfigType<'a> {
+struct ConfigType<'a> {
     #[xml(attr = "key")]
     key: Cow<'a, str>,
     #[xml(child = "Boolean")]
@@ -139,7 +139,7 @@ pub struct ConfigType<'a> {
 }
 
 impl<'a> ConfigType<'a> {
-    pub fn value(&self) -> ConfigDataType {
+    fn value(&self) -> ConfigDataType {
         match self {
             Self { boolean: Some(inner), .. } => {
                 ConfigDataType::Boolean(
@@ -164,23 +164,24 @@ impl<'a> ConfigType<'a> {
 }
 
 impl<'a> Dump for ConfigType<'a> {
-    fn dump(&self, buffer: &mut String, _depth: Option<&mut Vec<String>>) {
-        fn generic_impl<T: Display>(outer: &ConfigType, buffer: &mut String, value: T) {
-            let config = format!("#[no_mangle]\npub const {}: i64 = {};\n", outer.key.to_uppercase(), value);
+    fn dump(&self, buffer: &mut String, depth: Option<&mut Vec<String>>) {
+        fn generic_impl<T: Display>(outer: &ConfigType, buffer: &mut String, value: T, depth: Option<&mut Vec<String>>) {
+            let key = format!("CONFIG_{}_{}", depth.unwrap().join("_"), outer.key).to_uppercase();
+            let config = format!("#[no_mangle]\npub const {}: i64 = {};\n", key, value);
             buffer.push_str(config.as_str());
         }
 
         match self.value() {
-            ConfigDataType::Boolean(value) => generic_impl(self, buffer, value),
-            ConfigDataType::Integer(value) => generic_impl(self, buffer, value),
-            ConfigDataType::Enum(value) => generic_impl(self, buffer, value),
+            ConfigDataType::Boolean(value) => generic_impl(self, buffer, value, depth),
+            ConfigDataType::Integer(value) => generic_impl(self, buffer, value, depth),
+            ConfigDataType::Enum(value) => generic_impl(self, buffer, value, depth),
         }
     }
 }
 
 #[derive(Debug, XmlRead)]
 #[xml(tag = "Boolean")]
-pub struct BooleanType {
+struct BooleanType {
     #[xml(attr = "default")]
     default: bool,
     #[xml(attr = "value")]
@@ -189,7 +190,7 @@ pub struct BooleanType {
 
 #[derive(Debug, XmlRead)]
 #[xml(tag = "Integer")]
-pub struct IntegerType {
+struct IntegerType {
     #[xml(attr = "default")]
     default: i32,
     #[xml(attr = "value")]
@@ -204,7 +205,7 @@ pub struct IntegerType {
 
 #[derive(Debug, XmlRead)]
 #[xml(tag = "Enum")]
-pub struct EnumType {
+struct EnumType {
     #[xml(attr = "default")]
     default: u32,
     #[xml(attr = "value")]
@@ -215,7 +216,7 @@ pub struct EnumType {
 
 #[derive(Debug, XmlRead)]
 #[xml(tag = "Member")]
-pub struct MemberType {
+struct MemberType {
     #[xml(text)]
     content: i32,
 }
