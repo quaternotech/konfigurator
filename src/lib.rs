@@ -27,10 +27,11 @@ use strong_xml::XmlRead;
 use crate::error::{FileFormatError, IOError};
 use crate::model::Konfigurator;
 
+pub mod error;
+pub mod formatter;
 pub mod interface;
 pub mod model;
 pub mod utils;
-pub mod error;
 
 pub const SRC_FILE: &'static str = "Konfigurator.xml";
 pub const OUT_FILE: &'static str = "Konfigurator.rs";

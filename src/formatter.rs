@@ -20,23 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use std::error::Error;
 
-use clap::Parser;
 
-use konfigurator::interface::{Command, Interface};
-
-fn main() -> Result<(), Box<dyn Error>> {
-    let input = Interface::parse();
-
-    match input.command {
-        Command::Bake { work_dir, out_dir, verbose } => {
-            match konfigurator::bake(work_dir, out_dir, verbose) {
-                Ok(generated_file) => println!("Successfully generated file: {}", generated_file),
-                Err(err) => eprintln!("{}", err),
-            }
-        }
-    }
-
-    Ok(())
+pub trait Formatter {
+    fn format() -> String;
 }

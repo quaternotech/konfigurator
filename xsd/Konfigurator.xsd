@@ -5,10 +5,6 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element name="Section" type="SectionType" minOccurs="0" maxOccurs="unbounded"/>
-            </xs:sequence>
-            <xs:attribute name="name" type="NonEmptyStringType" use="required"/>
-            <xs:attribute name="arch" type="SupportedArchitectureType" use="required"/>
-            <xs:attribute name="profile" type="AvailableProfileType" use="required"/>
         </xs:complexType>
         <xs:unique name="UniqueSection">
             <xs:selector xpath="Section"/>
